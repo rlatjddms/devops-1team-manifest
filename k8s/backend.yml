@@ -3,30 +3,80 @@ kind: Deployment
 metadata:
   name: backend
 spec:
+  replicas: 1
   selector:
     matchLabels:
-      app: boot
-  replicas: 3
+      app: backend
   template:
     metadata:
       labels:
-        app: boot
+        app: backend
     spec:
+      volumes:
+        - name: tmp
+          emptyDir: { }
       containers:
-        - name: spicy-backend
-          image: tjddms/argocd-pipe:latest
-          imagePullPolicy: Always
+        - name: backend
+          image: tjddms/spicy-backend:1.0
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           ports:
             - containerPort: 8000
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "local"
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: spicy-config
+                  key: SPRING_DATASOURCE_URL
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: spicy-secret
+                  key: SPRING_DATASOURCE_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: spicy-secret
+                  key: SPRING_DATASOURCE_PASSWORD
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: spicy-secret
+                  key: JWT_SECRET
+            - name: JWT_EXPIRATION
+              valueFrom:
+                configMapKeyRef:
+                  name: spicy-config
+                  key: JWT_EXPIRATION
+            - name: JWT_REFRESH_EXPIRATION
+              valueFrom:
+                configMapKeyRef:
+                  name: spicy-config
+                  key: JWT_REFRESH_EXPIRATION
+            - name: SPICY_ADMIN_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: spicy-secret
+                  key: ADMIN_KEY
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: boot-service
+  name: backend-service
 spec:
-  type: ClusterIP
-  ports:
-    - port: 8001
-      targetPort: 8000
   selector:
-    app: boot
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: ClusterIP
