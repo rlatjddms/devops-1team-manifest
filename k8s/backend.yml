@@ -28,7 +28,7 @@ spec:
             - name: tmp
               mountPath: /tmp
           ports:
-            - containerPort: 8000
+            - containerPort: 8080
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "local"
@@ -78,5 +78,5 @@ spec:
   ports:
     - protocol: TCP
       port: 8000
-      targetPort: 8000
+      targetPort: 8080
   type: ClusterIP
