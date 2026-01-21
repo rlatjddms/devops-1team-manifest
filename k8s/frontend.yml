@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: tjddms/spicy-frontend:83
+          image: tjddms/spicy-frontend:85
           imagePullPolicy: IfNotPresent
 #          securityContext:
 #            runAsNonRoot: true
