@@ -17,7 +17,7 @@ spec:
           emptyDir: { }
       containers:
         - name: backend
-          image: tjddms/spicy-backend:81
+          image: tjddms/spicy-backend:82
           imagePullPolicy: IfNotPresent
           securityContext:
             runAsNonRoot: true
